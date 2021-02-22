@@ -39,4 +39,4 @@
 	url = https://github.com/lume/basicss.git
 [submodule "packages/custom-attributes"]
 	path = packages/custom-attributes
-	url = git@github.com:lume/custom-attributes.git
+	url = https://github.com/lume/custom-attributes.git
