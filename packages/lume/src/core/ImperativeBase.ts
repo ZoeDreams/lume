@@ -1,19 +1,20 @@
-import {Object3D} from 'three/src/core/Object3D'
+import {Object3D} from 'three/src/core/Object3D.js'
 import {Mixin, MixinResult, Constructor} from 'lowclass'
 import {reactive, StopFunction, autorun, untrack, element} from '@lume/element'
-import Transformable from './Transformable'
-import ElementOperations from './ElementOperations'
-import Motor from './Motor'
-import {CSS3DObjectNested} from '../lib/three/CSS3DRendererNested'
-import {disposeObject} from '../utils/three'
-import {Events} from './Events'
-import Settable from '../utils/Settable'
-import {defer, toRadians} from './Utility'
+import Transformable from './Transformable.js'
+import ElementOperations from './ElementOperations.js'
+import Motor from './Motor.js'
+import {CSS3DObjectNested} from '../lib/three/CSS3DRendererNested.js'
+import {disposeObject} from '../utils/three.js'
+import {Events} from './Events.js'
+import Settable from '../utils/Settable.js'
+import {defer, toRadians} from './Utility.js'
 
-import type {TreeNode} from './TreeNode'
-import type {Node} from './Node'
-import type {Scene} from './Scene'
-import type {ConnectionType} from '../html/DeclarativeBase'
+import type {TreeNode} from './TreeNode.js'
+import type {Node} from './Node.js'
+import type {Scene} from './Scene.js'
+import type {ConnectionType} from '../html/DeclarativeBase.js'
+import type {TransformableAttributes} from './Transformable.js'
 
 window.addEventListener('error', event => {
 	const error = event.error
@@ -65,6 +66,8 @@ const threeJsPostAdjustment = [0, 0, 0]
 const alignAdjustment = [0, 0, 0]
 const mountPointAdjustment = [0, 0, 0]
 const appliedPosition = [0, 0, 0]
+
+export type BaseAttributes = TransformableAttributes
 
 /**
  * @abstract
@@ -230,12 +233,12 @@ function ImperativeBaseMixin<T extends Constructor>(Base: T) {
 
 					untrack(() => {
 						if (
-							this.sizeMode.x === 'proportional' ||
-							this.sizeMode.y === 'proportional' ||
-							this.sizeMode.z === 'proportional' ||
-							this.align.x !== 0 ||
-							this.align.y !== 0 ||
-							this.align.z !== 0
+							this.getSizeMode().x === 'proportional' ||
+							this.getSizeMode().y === 'proportional' ||
+							this.getSizeMode().z === 'proportional' ||
+							this.getAlignPoint().x !== 0 ||
+							this.getAlignPoint().y !== 0 ||
+							this.getAlignPoint().z !== 0
 						) {
 							this._calcSize()
 							this.needsUpdate()
@@ -249,7 +252,7 @@ function ImperativeBaseMixin<T extends Constructor>(Base: T) {
 					this.rotation
 					this.scale
 					this.origin
-					this.align
+					this.alignPoint
 					this.mountPoint
 					this.opacity
 
@@ -700,8 +703,10 @@ function ImperativeBaseMixin<T extends Constructor>(Base: T) {
 		 * move _calcSize to a render task.
 		 */
 		protected _calculateMatrix(): void {
-			// const {__align: align, __mountPoint: mountPoint, __position: position, __origin: origin} = this
-			const {align, mountPoint, position, origin} = this
+			const align = this.getAlignPoint()
+			const mountPoint = this.getMountPoint()
+			const position = this.getPosition()
+			const origin = this.getOrigin()
 
 			const size = this.calculatedSize
 
@@ -812,6 +817,8 @@ function ImperativeBaseMixin<T extends Constructor>(Base: T) {
 		}
 
 		protected _updateRotation(): void {
+			const {x, y, z} = this.getRotation()
+
 			// Currently rotation is left-handed as far as values inputted into
 			// the LUME APIs. This method converts them to Three's right-handed
 			// system.
@@ -828,34 +835,26 @@ function ImperativeBaseMixin<T extends Constructor>(Base: T) {
 			// TODO Make the handedness configurable (f.e. left handed or right
 			// handed rotation)
 
-			this.three.rotation.set(
-				-toRadians(this.rotation.x),
-				// We don't negate Y rotation here, but we negate Y translation
-				// in _calculateMatrix so that it has the same effect.
-				toRadians(this.rotation.y),
-				-toRadians(this.rotation.z),
-			)
+			// We don't negate Y rotation here, but we negate Y translation
+			// in _calculateMatrix so that it has the same effect.
+			this.three.rotation.set(-toRadians(x), toRadians(y), -toRadians(z))
 
-			// TODO Besides that Transformable shouldn't know about Three.js
-			// objects, it should also not know about Scene. The isScene check
-			// prevents us from having to import Scene (avoiding a circular
-			// dependency).
-			const childOfScene = (this.parent as any)?.isScene
+			const childOfScene = this.parent?.isScene
 
 			// TODO write a comment as to why we needed the childOfScne check to
 			// alternate rotation directions here. It's been a while, I forgot
 			// why. I should've left a comment when I wrote this!
 			this.threeCSS.rotation.set(
-				(childOfScene ? -1 : 1) * toRadians(this.rotation.x),
-				toRadians(this.rotation.y),
-				(childOfScene ? -1 : 1) * toRadians(this.rotation.z),
+				(childOfScene ? -1 : 1) * toRadians(x),
+				toRadians(y),
+				(childOfScene ? -1 : 1) * toRadians(z),
 			)
 		}
 
 		protected _updateScale(): void {
-			this.three.scale.set(this.scale.x, this.scale.y, this.scale.z)
-
-			this.threeCSS.scale.set(this.scale.x, this.scale.y, this.scale.z)
+			const {x, y, z} = this.getScale()
+			this.three.scale.set(x, y, z)
+			this.threeCSS.scale.set(x, y, z)
 		}
 
 		protected _calculateWorldMatricesInSubtree(): void {
@@ -948,3 +947,12 @@ function makeMixin() {
 
 // "as default" form is required here, otherwise it'll break.
 export {ImperativeBase as default}
+
+declare module '@lume/element' {
+	namespace JSX {
+		// Attributes for all elements.
+		interface CustomAttributes<T> {
+			has?: string
+		}
+	}
+}

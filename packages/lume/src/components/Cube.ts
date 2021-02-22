@@ -1,5 +1,7 @@
-import forLength from 'army-knife/forLength'
-import Node from '../core/Node'
+import forLength from 'army-knife/forLength.js'
+import Node from '../core/Node.js'
+
+// !! WIP under construction
 
 /**
  * @extends Node
@@ -36,15 +38,15 @@ export default class Cube extends Node {
 	 * @param {string} name - The name of the side.
 	 */
 	_createCubeSide(index: number) {
-		const rotator = new Node({
-			align: [0.5, 0.5],
+		const rotator = new Node().set({
+			alignPoint: [0.5, 0.5],
 			mountPoint: [0.5, 0.5],
 		})
 
-		const side = new Node({
-			align: [0.5, 0.5],
+		const side = new Node().set({
+			alignPoint: [0.5, 0.5],
 			mountPoint: [0.5, 0.5],
-			size: [this.size, this.size],
+			size: [this.getSize().x, this.getSize().x],
 		})
 
 		this.sides.push(side)
@@ -59,11 +61,11 @@ export default class Cube extends Node {
 		// rotate and place each side.
 		if (index < 4)
 			// 4 sides
-			rotator.rotation.y = 90 * index
+			rotator.getRotation().y = 90 * index
 		// top/bottom
-		else rotator.rotation.x = 90 * (index % 2 ? -1 : 1)
+		else rotator.getRotation().x = 90 * (index % 2 ? -1 : 1)
 
-		side.position.z = this.size.x / 2
+		side.getPosition().z = this.getSize().x / 2
 
 		this.add(rotator)
 	}

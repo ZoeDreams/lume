@@ -38,9 +38,11 @@
   - components/
   - [Cube](/api/components/Cube.md)
   - core/
+  - [AmbientLight](/api/core/AmbientLight.md)
+  - [ColladaModel](/api/core/ColladaModel.md)
   - [GltfModel](/api/core/GltfModel.md)
-  - [ImperativeBase](/api/core/ImperativeBase.md)
   - [LightBase](/api/core/LightBase.md)
+  - [ImperativeBase](/api/core/ImperativeBase.md)
   - [Node](/api/core/Node.md)
   - [Scene](/api/core/Scene.md)
   - [TreeNode](/api/core/TreeNode.md)

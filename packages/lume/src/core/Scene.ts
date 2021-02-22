@@ -6,22 +6,24 @@ import {Mixin, MixinResult, Constructor} from 'lowclass'
 import {reactive, autorun, booleanAttribute, attribute, numberAttribute, untrack, element} from '@lume/element'
 import {emits} from '@lume/eventful'
 import documentReady from '@awaitbox/document-ready'
-import {Scene as ThreeScene} from 'three/src/scenes/Scene'
-import {PerspectiveCamera as ThreePerspectiveCamera} from 'three/src/cameras/PerspectiveCamera'
-// import {AmbientLight} from 'three/src/lights/AmbientLight'
-import {Color} from 'three/src/math/Color'
-import {WebGLRendererThree, ShadowMapTypeString} from './WebGLRendererThree'
-import {CSS3DRendererThree} from './CSS3DRendererThree'
-import ImperativeBase, {initImperativeBase} from './ImperativeBase'
-import {default as HTMLInterface} from '../html/HTMLScene'
-import {documentBody, thro, trim} from './Utility'
-import {possiblyPolyfillResizeObserver} from './ResizeObserver'
+import {Scene as ThreeScene} from 'three/src/scenes/Scene.js'
+import {PerspectiveCamera as ThreePerspectiveCamera} from 'three/src/cameras/PerspectiveCamera.js'
+// import {AmbientLight} from 'three/src/lights/AmbientLight.js'
+import {Color} from 'three/src/math/Color.js'
+import {WebGLRendererThree, ShadowMapTypeString} from './WebGLRendererThree.js'
+import {CSS3DRendererThree} from './CSS3DRendererThree.js'
+import ImperativeBase, {initImperativeBase} from './ImperativeBase.js'
+import {default as HTMLInterface} from '../html/HTMLScene.js'
+import {documentBody, thro, trim} from './Utility.js'
+import {possiblyPolyfillResizeObserver} from './ResizeObserver.js'
+import {isDisposable} from '../utils/three.js'
 
-import {TColor, isDisposable} from '../utils/three'
-import type {PerspectiveCamera} from './PerspectiveCamera'
-import type {XYZValuesObject} from './XYZValues'
-import type Sizeable from './Sizeable'
-import type TreeNode from './TreeNode'
+import type {TColor} from '../utils/three.js'
+import type {PerspectiveCamera} from './PerspectiveCamera.js'
+import type {XYZValuesObject} from './XYZValues.js'
+import type Sizeable from './Sizeable.js'
+import type {SizeableAttributes} from './Sizeable.js'
+import type TreeNode from './TreeNode.js'
 
 initImperativeBase()
 
@@ -47,7 +49,7 @@ const _Scene = Mixin(SceneMixin)
  * `<script src="${location.origin+location.pathname}/global.js"><\/script>
  *
  * <lume-scene id="scene">
- *   <lume-node size="100 100" align="0.5 0.5" mount-point="0.5 0.5" rotation="0 30 0">
+ *   <lume-node size="100 100" align-point="0.5 0.5" mount-point="0.5 0.5" rotation="0 30 0">
  *   	I am centered in the scene, and I am rotated a bit.
  *   </lume-node>
  * </lume-scene>
@@ -81,6 +83,19 @@ const _Scene = Mixin(SceneMixin)
 export const Scene = _Scene.mixin(HTMLInterface)
 export interface Scene extends InstanceType<typeof Scene> {}
 export default Scene
+
+export type SceneAttributes =
+	// Don't expost TransformableAttributes here for now (although they exist). What should modifying those on a Scene do?
+	| SizeableAttributes
+	| 'shadowmapType'
+	| 'vr'
+	| 'webgl'
+	| 'enableCss'
+	| 'backgroundColor'
+	| 'backgroundOpacity'
+	| 'background'
+	| 'equirectangularBackground'
+	| 'environment'
 
 function SceneMixin<T extends Constructor>(Base: T) {
 	// NOTE For now, we assume Scene is mixed with its HTMLInterface.
@@ -177,7 +192,7 @@ function SceneMixin<T extends Constructor>(Base: T) {
 			 * [`Sizeable.sizeMode`](TODO) property to make the default values for the X and
 			 * Y axes both "proportional".
 			 */
-			this.sizeMode.set('proportional', 'proportional', 'literal')
+			this.getSizeMode().set('proportional', 'proportional', 'literal')
 
 			/**
 			 * @override
@@ -186,7 +201,7 @@ function SceneMixin<T extends Constructor>(Base: T) {
 			 * [`Sizeable.size`](TODO) property to make the default values for the
 			 * X and Y axes both `1`.
 			 */
-			this.size.set(1, 1, 0)
+			this.getSize().set(1, 1, 0)
 
 			// The scene should always render CSS properties (it needs to always
 			// be rendered or resized, for example, because it contains the
@@ -639,7 +654,7 @@ function SceneMixin<T extends Constructor>(Base: T) {
 				// If we will be rendering something...
 				(this.enableCss || this.webgl) &&
 				// ...and if one size dimension is proportional...
-				(this.sizeMode.x == 'proportional' || this.sizeMode.y == 'proportional')
+				(this.getSizeMode().x == 'proportional' || this.getSizeMode().y == 'proportional')
 				// Note, we don't care about the Z dimension, because Scenes are flat surfaces.
 			) {
 				// ...then observe the parent element size (it may not be a LUME
@@ -742,4 +757,20 @@ function isImperativeBase(_n: TreeNode): _n is ImperativeBase {
 	// to always have an ImperativeNode where we use this.
 	// return n instanceof ImperativeBase
 	return true
+}
+
+import type {ElementAttributes} from '@lume/element'
+
+declare module '@lume/element' {
+	namespace JSX {
+		interface IntrinsicElements {
+			'lume-scene': ElementAttributes<Scene, SceneAttributes>
+		}
+	}
+}
+
+declare global {
+	interface HTMLElementTagNameMap {
+		'lume-scene': Scene
+	}
 }

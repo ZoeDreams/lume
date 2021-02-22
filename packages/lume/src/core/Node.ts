@@ -1,12 +1,15 @@
 import {autorun, booleanAttribute, element} from '@lume/element'
 import {emits} from '@lume/eventful'
 import {Mixin, MixinResult, Constructor} from 'lowclass'
-import ImperativeBase, {initImperativeBase} from './ImperativeBase'
-import {default as HTMLInterface} from '../html/HTMLNode'
+import ImperativeBase, {initImperativeBase} from './ImperativeBase.js'
+import {default as HTMLInterface} from '../html/HTMLNode.js'
 
 // register behaviors that can be used on this element
-import '../html/behaviors/ObjModelBehavior'
-import '../html/behaviors/GltfModelBehavior'
+import '../html/behaviors/ObjModelBehavior.js'
+import '../html/behaviors/GltfModelBehavior.js'
+import '../html/behaviors/ColladaModelBehavior.js'
+
+import type {BaseAttributes} from './ImperativeBase.js'
 
 initImperativeBase()
 
@@ -86,67 +89,67 @@ const _Node = Mixin(NodeMixin)
  *   <lume-node
  *     id="container"
  *     size="78 78"
- *     align="0.5 0.5"
+ *     align-point="0.5 0.5"
  *     mount-point="0.5 0.5"
  *   >
- *     <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *     <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *       <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *     </lume-node>
- *     <lume-node class="rotator A" size="60 60" align="1 1">
- *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *     <lume-node class="rotator A" size="60 60" align-point="1 1">
+ *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *         <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *       </lume-node>
- *       <lume-node class="rotator" size="45 45" align="1 1">
- *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *       <lume-node class="rotator" size="45 45" align-point="1 1">
+ *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *           <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *         </lume-node>
- *         <lume-node class="rotator" size="28 28" align="1 1">
- *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *         <lume-node class="rotator" size="28 28" align-point="1 1">
+ *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *             <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *           </lume-node>
  *         </lume-node>
  *       </lume-node>
  *     </lume-node>
  *     <lume-node class="rotator A" size="60 60" mount-point="1 1">
- *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *         <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *       </lume-node>
  *       <lume-node class="rotator" size="45 45" mount-point="1 1">
- *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *           <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *         </lume-node>
  *         <lume-node class="rotator" size="28 28" mount-point="1 1">
- *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *             <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *           </lume-node>
  *         </lume-node>
  *       </lume-node>
  *     </lume-node>
- *     <lume-node class="rotator B" size="60 60" align="0 1" mount-point="1 0">
- *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *     <lume-node class="rotator B" size="60 60" align-point="0 1" mount-point="1 0">
+ *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *         <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *       </lume-node>
- *       <lume-node class="rotator" size="45 45" align="0 1" mount-point="1 0">
- *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *       <lume-node class="rotator" size="45 45" align-point="0 1" mount-point="1 0">
+ *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *           <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *         </lume-node>
- *         <lume-node class="rotator" size="28 28" align="0 1" mount-point="1 0">
- *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *         <lume-node class="rotator" size="28 28" align-point="0 1" mount-point="1 0">
+ *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *             <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *           </lume-node>
  *         </lume-node>
  *       </lume-node>
  *     </lume-node>
- *     <lume-node class="B" size="60 60" align="1 0" mount-point="0 1">
- *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *     <lume-node class="B" size="60 60" align-point="1 0" mount-point="0 1">
+ *       <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *         <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *       </lume-node>
- *       <lume-node class="rotator" size="45 45" align="1 0" mount-point="0 1">
- *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *       <lume-node class="rotator" size="45 45" align-point="1 0" mount-point="0 1">
+ *         <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *           <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *         </lume-node>
- *         <lume-node class="rotator" size="28 28" align="1 0" mount-point="0 1">
- *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align="0.5 0.5" mount-point="0.5 0.5">
+ *         <lume-node class="rotator" size="28 28" align-point="1 0" mount-point="0 1">
+ *           <lume-node class="sun" size-mode="proportional proportional" size="0.8 0.8" position="0 0 10" align-point="0.5 0.5" mount-point="0.5 0.5">
  *             <img src="https://momlovesbest.com/wp-content/uploads/2020/03/A-UPF-Rating.png" />
  *           </lume-node>
  *         </lume-node>
@@ -223,6 +226,8 @@ const _Node = Mixin(NodeMixin)
 export const Node = _Node.mixin(HTMLInterface)
 export interface Node extends InstanceType<typeof Node> {}
 export default Node
+
+export type NodeAttributes = BaseAttributes | 'visible'
 
 function NodeMixin<T extends Constructor>(Base: T) {
 	// NOTE for now, we assume Node is mixed with its HTMLInterface.
@@ -322,4 +327,20 @@ function NodeMixin<T extends Constructor>(Base: T) {
 	}
 
 	return Node as MixinResult<typeof Node, T>
+}
+
+import type {ElementAttributes} from '@lume/element'
+
+declare module '@lume/element' {
+	namespace JSX {
+		interface IntrinsicElements {
+			'lume-node': ElementAttributes<Node, NodeAttributes>
+		}
+	}
+}
+
+declare global {
+	interface HTMLElementTagNameMap {
+		'lume-node': Node
+	}
 }

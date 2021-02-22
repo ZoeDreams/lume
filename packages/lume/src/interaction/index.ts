@@ -1,2 +1,2 @@
-export * from './flingRotation'
-export * from './ScrollFling'
+export * from './FlingRotation.js'
+export * from './ScrollFling.js'

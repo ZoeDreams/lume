@@ -1,25 +1,33 @@
 import 'element-behaviors'
 import {reactive, attribute, autorun} from '@lume/element'
-import {Scene} from 'three/src/scenes/Scene'
-import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader'
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader'
-import {disposeObjectTree} from '../../utils/three'
-import {Events} from '../../core/Events'
-import {RenderableBehavior} from './RenderableBehavior'
+import {Scene} from 'three/src/scenes/Scene.js'
+import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js'
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
+import {disposeObjectTree} from '../../utils/three.js'
+import {Events} from '../../core/Events.js'
+import {RenderableBehavior} from './RenderableBehavior.js'
 
 import type {StopFunction} from '@lume/element'
-import type {GLTF} from 'three/examples/jsm/loaders/GLTFLoader'
+import type {GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js'
+
+export type GltfModelBehaviorAttributes = 'src' | 'dracoDecoder'
 
 @reactive
 export default class GltfModelBehavior extends RenderableBehavior {
+	/** Path to a .gltf or .glb file. */
 	@attribute src = ''
-	@attribute dracoDecoderPath = ''
+	/** Path to the draco decoder for the GLTF src file. */
+	@attribute dracoDecoder = ''
+
 	dracoLoader?: DRACOLoader
 	gltfLoader?: GLTFLoader
 	model: GLTF | null = null
 
 	protected static _observedProperties = ['src', 'dracoPath', ...(RenderableBehavior._observedProperties || [])]
 
+	// This is incremented any time we need a pending load() to cancel (f.e. on
+	// src change, or unloadGL cycle), so that the loader will ignore the
+	// result when a version change has happened.
 	private __version = 0
 
 	private __stopFns: StopFunction[] = []
@@ -36,16 +44,16 @@ export default class GltfModelBehavior extends RenderableBehavior {
 		this.__stopFns.push(
 			autorun(() => {
 				this.src
-				if (this.dracoDecoderPath) {
+				if (this.dracoDecoder) {
 					if (!firstRun) this.dracoLoader?.dispose()
-					this.dracoLoader!.setDecoderPath(this.dracoDecoderPath)
+					this.dracoLoader!.setDecoderPath(this.dracoDecoder)
 				}
 			}),
 			autorun(() => {
 				this.src
-				this.dracoDecoderPath
+				this.dracoDecoder
 
-				if (!firstRun) this.__cleanupModel()
+				this.__cleanupModel()
 
 				// TODO We can update only the material or model specifically
 				// instead of reloading the whole object.
@@ -70,6 +78,9 @@ export default class GltfModelBehavior extends RenderableBehavior {
 
 		this.__cleanupModel()
 
+		// Increment this in case the loader is still loading, so it will ignore the result.
+		this.__version++
+
 		return true
 	}
 
@@ -79,12 +90,12 @@ export default class GltfModelBehavior extends RenderableBehavior {
 	}
 
 	private __loadObj() {
-		const {src, dracoDecoderPath, __version} = this
+		const {src, dracoDecoder, __version} = this
 
 		if (!src) return
 
-		// In the followinggltfLoader.load() callbacks, if __version doesn't
-		// match, it means this.src or this.dracoDecoderPath changed while
+		// In the following gltfLoader.load() callbacks, if __version doesn't
+		// match, it means this.src or this.dracoDecoder changed while
 		// a previous model was loading, in which case we ignore that
 		// result and wait for the next model to load.
 
@@ -92,15 +103,16 @@ export default class GltfModelBehavior extends RenderableBehavior {
 			src,
 			model => __version == this.__version && this.__setModel(model),
 			progress => __version == this.__version && this.element.emit(Events.PROGRESS, progress),
-			error => __version == this.__version && this.__onError(src, dracoDecoderPath, error),
+			error => __version == this.__version && this.__onError(src, dracoDecoder, error),
 		)
 	}
 
-	private __onError(src: string, dracoDecoderPath: string, error: ErrorEvent) {
+	private __onError(src: string, dracoDecoder: string, error: ErrorEvent) {
 		const message =
-			error?.message ?? `Failed to load <gltf-model> with src "${src}" and dracoDecoderPath "${dracoDecoderPath}"`
+			error?.message ??
+			`Failed to load ${this.element.tagName.toLowerCase()} with src "${src}" and dracoDecoder "${dracoDecoder}".`
 		console.warn(message)
-		this.element.emit(Events.GLTF_ERROR, {src, dracoDecoderPath})
+		this.element.emit(Events.GLTF_ERROR, {src, dracoDecoder})
 	}
 
 	private __setModel(model: GLTF) {
